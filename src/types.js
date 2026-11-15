@@ -34,6 +34,15 @@
  * @property {string} person        Name of the elder
  * @property {boolean} canSpeak     Whether read aloud is available
  *
+ * @typedef {Object} RxState
+ * @property {string} text
+ * @property {File|null} file
+ * @property {Array<{name:string,dose:string,times:string[],instruction:string}>|null} pending
+ * @property {Warning[]} warnings
+ * @property {boolean} busy
+ * @property {string} err
+ * @property {boolean} aiBusy
+ *
  * @typedef {Object} Warning
  * @property {"high"|"medium"|"low"} severity
  * @property {string} title

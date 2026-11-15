@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { extractJSON, normItems, localParse, capitalise } from "../src/parser.js";
+import { extractJSON, normItems, localParse, validateRxInput, MAX_TEXT_LENGTH, MAX_IMAGE_BYTES } from "../src/parser.js";
+import { capitalise } from "../src/text.js";
 
 const SAMPLE = `Dr. A. Menon, General Physician
 Patient: Ramesh Sharma, 72 M
@@ -67,4 +68,16 @@ test("normItems tolerates non arrays", () => {
 test("capitalise handles empty strings", () => {
   assert.equal(capitalise(""), "");
   assert.equal(capitalise("abc"), "Abc");
+});
+
+test("validateRxInput accepts normal text and small images", () => {
+  assert.equal(validateRxInput("Tab Aspirin 75 mg", null), null);
+  assert.equal(validateRxInput("", { type: "image/png", size: 1000 }), null);
+});
+
+test("validateRxInput rejects empty, oversized and non image input", () => {
+  assert.match(validateRxInput("   ", null), /Paste the prescription/);
+  assert.match(validateRxInput("x".repeat(MAX_TEXT_LENGTH + 1), null), /too long/);
+  assert.match(validateRxInput("", { type: "application/pdf", size: 10 }), /image file/);
+  assert.match(validateRxInput("", { type: "image/jpeg", size: MAX_IMAGE_BYTES + 1 }), /too large/);
 });

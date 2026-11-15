@@ -2,7 +2,7 @@
 
 import { fmt, toMin } from "../schedule.js";
 import { bySeverity } from "../rules.js";
-import { esc } from "../escape.js";
+import { esc } from "../text.js";
 
 const TAGS = { high: "Talk to the doctor first", medium: "Worth checking", low: "Note" };
 
@@ -28,7 +28,7 @@ function safetyCheck(rx) {
 }
 
 /**
- * @param {{rx: object, ai: {available: boolean, images: boolean}}} data
+ * @param {{rx: import("../types.js").RxState, ai: {available: boolean, images: boolean}}} data
  */
 export function viewPrescription({ rx, ai }) {
   const reading = rx.busy ? '<span class="spin" aria-hidden="true"></span>Reading' : "Read prescription";
@@ -42,7 +42,7 @@ export function viewPrescription({ rx, ai }) {
   let html = '<div class="view"><p class="chap">02 / 03 &nbsp; NEW PRESCRIPTION</p><h1 tabindex="-1">Paste it.<br><em>We do the rest.</em></h1>';
   html += "<p class=\"sub\">Drop in the doctor's note. Saathi reads it, builds the schedule, and checks it against what is already being taken.</p>";
   html += '<div class="two"><section class="card" aria-labelledby="rx-h"><h2 id="rx-h">1. The prescription</h2>';
-  html += `<label for="rxtext" class="sr-only">Prescription text, one medicine per line</label><textarea id="rxtext" class="mt-md" placeholder="One medicine per line, for example:\nTab Warfarin 5 mg, once daily at 6 PM">${esc(rx.text)}</textarea>`;
+  html += `<label for="rxtext" class="sr-only">Prescription text, one medicine per line</label><textarea id="rxtext" class="mt-md" maxlength="5000" placeholder="One medicine per line, for example:\nTab Warfarin 5 mg, once daily at 6 PM">${esc(rx.text)}</textarea>`;
   html += `<div class="acts"><button class="btn acc" data-a="read"${rx.busy ? " disabled" : ""}>${reading}</button><button class="btn ghost" data-a="sample">Use a sample</button>${photo}</div>`;
   html += `<p class="hint">${aiNote} Not medical advice. Always confirm with the doctor or pharmacist.</p>`;
   if (rx.err) html += `<p class="hint strong" role="alert">${esc(rx.err)}</p>`;

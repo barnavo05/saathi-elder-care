@@ -3,7 +3,7 @@
  * Pure function so it is easy to test.
  */
 
-import { fmt, dosesFor, doseStatus } from "./schedule.js";
+import { fmt, toMin, dosesFor, doseStatus } from "./schedule.js";
 import { describeSupply } from "./refill.js";
 
 /**
@@ -18,7 +18,7 @@ export function buildDoctorSummary(ctx, week, low) {
     `Medication summary for ${ctx.person}`,
     "",
     "Current medicines:",
-    ...ctx.meds.map((m) => `- ${m.name} ${m.dose}, ${m.times.map((t) => fmt(Number(t.slice(0, 2)) * 60 + Number(t.slice(3)))).join(" and ")}${m.note ? ` (${m.note})` : ""}`),
+    ...ctx.meds.map((m) => `- ${m.name} ${m.dose}, ${m.times.map((t) => fmt(toMin(t))).join(" and ")}${m.note ? ` (${m.note})` : ""}`),
     "",
     `Adherence over the last 7 days: ${week.avg} percent (${week.taken} of ${week.total} doses).`,
     missed.length

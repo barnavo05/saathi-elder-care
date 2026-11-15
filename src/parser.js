@@ -4,8 +4,7 @@
  */
 
 import { pad } from "./schedule.js";
-
-export const capitalise = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
+import { capitalise } from "./text.js";
 
 /** Pull the first JSON array out of a model reply, even inside code fences. */
 export function extractJSON(text) {
@@ -72,4 +71,22 @@ export function localParse(text) {
       return { name: name[1], dose, times: timesFromLine(clean), instruction };
     })
     .filter(Boolean);
+}
+
+/** Limits for what a user can submit, to keep requests small and predictable. */
+export const MAX_TEXT_LENGTH = 5000;
+export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+/**
+ * Check prescription input before it is parsed or sent to the AI.
+ * @param {string} text
+ * @param {{type?: string, size?: number}|null} file
+ * @returns {string|null} A message for the user, or null when the input is fine.
+ */
+export function validateRxInput(text, file) {
+  if (!String(text || "").trim() && !file) return "Paste the prescription text or add a photo first.";
+  if (String(text || "").length > MAX_TEXT_LENGTH) return `That is too long. Keep it under ${MAX_TEXT_LENGTH} characters.`;
+  if (file && !/^image\//.test(file.type || "")) return "Please choose an image file.";
+  if (file && file.size > MAX_IMAGE_BYTES) return "That photo is too large. Choose one under 5 MB.";
+  return null;
 }

@@ -3,7 +3,7 @@
 import { fmt, dosesFor } from "../schedule.js";
 import { PERIODS } from "../config.js";
 import { lowSupply, describeSupply } from "../refill.js";
-import { esc } from "../escape.js";
+import { esc } from "../text.js";
 import { statusOf, statusLabel } from "./shared.js";
 
 const greeting = (now) => (now < 720 ? "Good morning" : now < 1020 ? "Good afternoon" : "Good evening");
@@ -17,7 +17,7 @@ function nextCard(ctx, next) {
   const speak = ctx.canSpeak
     ? `<button class="btn ghost" data-a="speak" data-id="${esc(next.id)}">Read aloud</button>`
     : "";
-  return `<section class="next" aria-label="Next dose"><div><p class="lbl">${label} &middot; ${fmt(next.min)}</p><p class="big">${esc(next.med.name)} ${esc(next.med.dose)}</p><p class="note">${esc(next.med.note || "")}</p></div><div class="next-actions">${speak}<button class="btn acc" data-a="take" data-id="${esc(next.id)}" aria-label="Mark ${esc(next.med.name)} as taken">I took it</button></div></section>`;
+  return `<section class="next" aria-label="Next dose"><div><p class="lbl">${label} &middot; ${fmt(next.min)}</p><p class="big">${esc(next.med.name)} ${esc(next.med.dose)}</p><p class="note">${esc(next.med.note || "")}</p></div><div class="next-actions">${speak}<button class="btn acc" data-a="take" data-id="${esc(next.id)}" aria-label="I took it, ${esc(next.med.name)}">I took it</button></div></section>`;
 }
 
 function doseRow(ctx, dose) {
@@ -27,9 +27,9 @@ function doseRow(ctx, dose) {
   if (status === "taken") {
     action = `${statusLabel(ctx, dose)}<button class="link" data-a="untake" data-id="${esc(dose.id)}" aria-label="Undo ${name}">undo</button>`;
   } else if (status === "due") {
-    action = `<button class="btn sm" data-a="take" data-id="${esc(dose.id)}" aria-label="Mark ${name} as taken">Mark taken</button>`;
+    action = `<button class="btn sm" data-a="take" data-id="${esc(dose.id)}" aria-label="Mark taken, ${name}">Mark taken</button>`;
   } else if (status === "missed") {
-    action = `${statusLabel(ctx, dose)}<button class="btn sm ghost gap" data-a="take" data-id="${esc(dose.id)}" aria-label="Took ${name} late">Took it late</button>`;
+    action = `${statusLabel(ctx, dose)}<button class="btn sm ghost gap" data-a="take" data-id="${esc(dose.id)}" aria-label="Took it late, ${name}">Took it late</button>`;
   } else {
     action = '<span class="st up">Later today</span>';
   }
@@ -58,7 +58,7 @@ export function viewToday(ctx) {
   for (const period of PERIODS) {
     const list = doses.filter((d) => d.min >= period.from && d.min < period.to);
     if (!list.length) continue;
-    html += `<section class="grp" aria-label="${period.name} doses"><h3>${period.name}</h3>${list.map((d) => doseRow(ctx, d)).join("")}</section>`;
+    html += `<section class="grp" aria-label="${period.name} doses"><h2>${period.name}</h2>${list.map((d) => doseRow(ctx, d)).join("")}</section>`;
   }
   return `${html}</div>`;
 }

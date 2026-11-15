@@ -26,7 +26,7 @@ The app uses ES modules, so serve it over http instead of opening the file direc
 
 ```bash
 npm start        # serves on http://localhost:8080
-npm run check    # lint plus all tests (Node 18 or newer)
+npm run check    # lint, type check and all tests (Node 18 or newer)
 ```
 
 Then open the Prescription tab, click "Use a sample", then "Read prescription". Use the Demo clock bar at the bottom to jump to 2:30 PM and see missed dose alerts.
@@ -44,7 +44,7 @@ src/
   parser.js           Prescription parsing and AI output cleanup (pure)
   refill.js           Supply tracking and low stock detection (pure)
   report.js           Doctor summary text (pure)
-  escape.js           HTML escaping (pure)
+  text.js             HTML escaping and text helpers (pure)
   store.js            localStorage persistence and demo data
   ai.js               Optional AI layer, returns null when unavailable
   speech.js           Read aloud through the browser speech API
@@ -52,7 +52,7 @@ src/
   views/              Pure view functions: data in, HTML string out
     today.js  prescription.js  family.js  shared.js
   app.js              App shell: state, event table, rendering
-tests/                49 unit tests using the built in node:test runner
+tests/                64 unit tests using the built in node:test runner
 .github/workflows/    CI runs lint and tests on every push
 ```
 
@@ -60,27 +60,28 @@ Design rule: everything that makes a decision (scheduling, interactions, parsing
 
 ## Testing
 
-49 unit tests cover:
+64 unit tests (about 99 percent line coverage of the logic and view modules) cover:
 - dose status transitions, time formatting and adherence maths
 - interaction rules, including case insensitivity, duplicates and false positives
 - the prescription parser (abbreviations such as BD and TDS, explicit AM and PM times, malformed input, AI replies wrapped in code fences)
 - refill maths (never below zero, untracked medicines ignored)
 - doctor summary text
+- input validation, local storage recovery (corrupt or blocked storage), the AI layer with a fake provider, and read aloud
 - the rendered views, including that malicious medicine names are escaped and that alerts, progress bars and chart text alternatives are present
 
 ```bash
 npm test
 ```
 
-ESLint runs with `npm run lint`. CI runs both on every push.
+`npm run lint` runs ESLint and `npm run typecheck` runs the TypeScript compiler over the JSDoc types. `npm run coverage` prints coverage. CI runs lint, type check and tests on every push.
 
 ## Security and privacy
 
-- Strict Content Security Policy: scripts only from this site, no inline scripts, no inline styles, no network connections from the page.
+- Strict Content Security Policy: scripts only from this site, no inline scripts, no inline styles, and `connect-src` limited to this site. Referrer is not sent.
 - All dynamic text is HTML escaped before rendering, and tests check this.
 - No API keys exist anywhere in the code base.
 - Medication data stays in the browser (localStorage). Nothing is sent to a server by the app itself.
-- Read aloud uses the browser's own speech engine, so text does not leave the device.
+- Prescription input is validated (length, file type, file size) before it is parsed or sent to the AI.
 - Storage, speech and AI calls are wrapped so a failure never breaks the app.
 
 ## Accessibility
@@ -91,6 +92,7 @@ ESLint runs with `npm run lint`. CI runs both on every push.
 - Live regions announce toasts, safety results and the weekly note. The progress bar uses `role="progressbar"`. The chart has a text alternative.
 - Touch targets are at least 44 pixels. Text contrast meets WCAG AA. Status is shown in words, not only colour.
 - Larger text toggle, Read aloud for the next dose, and `prefers-reduced-motion` is respected.
+- Audited with axe-core (WCAG 2.2 AA and best practices) on every screen at desktop and mobile size and in large text mode, with zero violations. Fully usable with the keyboard alone.
 
 ## AI
 

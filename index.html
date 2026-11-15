@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
   <meta name="description" content="Saathi is a medication companion for elders and their families. It reads prescriptions, checks for risky combinations, and alerts family when a dose is missed.">
   <meta name="theme-color" content="#F6F3EC">
   <title>Saathi, a medication companion for elders and their families</title>
@@ -20,14 +21,14 @@
       <div class="nav">
         <div class="brand"><span class="dot" aria-hidden="true"></span>Saathi</div>
         <div class="tabs" id="tabs"></div>
-        <button class="xlbtn" data-a="xl" aria-pressed="false" aria-label="Larger text">A+</button>
+        <button class="xlbtn" data-a="xl" aria-pressed="false" aria-label="A+ larger text">A+</button>
       </div>
     </nav>
   </header>
   <main id="app" tabindex="-1"></main>
-  <div class="demo" role="group" aria-label="Demo clock">
+  <aside class="demo" aria-label="Demo clock">
     <span>Demo clock</span><span id="demo-chips" class="chips"></span>
-  </div>
+  </aside>
   <div id="toastbox" role="status" aria-live="polite"></div>
   <noscript><p class="noscript">Saathi needs JavaScript to run.</p></noscript>
   <script type="module" src="src/app.js"></script>

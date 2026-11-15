@@ -6,13 +6,12 @@
 
 import { dkey, dosesFor, weekSummary } from "./schedule.js";
 import { localCheck } from "./rules.js";
-import { normItems, localParse } from "./parser.js";
+import { normItems, localParse, validateRxInput } from "./parser.js";
 import { initState, save, clearSaved } from "./store.js";
 import { initAI, aiAvailable, aiImages, aiParse, aiReview, aiWeeklyNote } from "./ai.js";
 import { adjustSupply } from "./refill.js";
 import { canSpeak, speak } from "./speech.js";
 import { PERSON, CLOCKS, TABS, SAMPLE_RX, DEFAULT_SUPPLY } from "./config.js";
-import { esc } from "./escape.js";
 import { $, toast, focusSelector, applySizes } from "./dom.js";
 import { withFooter } from "./views/shared.js";
 import { viewToday } from "./views/today.js";
@@ -20,6 +19,7 @@ import { viewPrescription } from "./views/prescription.js";
 import { viewFamily, doctorText } from "./views/family.js";
 
 const TODAY = dkey(new Date());
+/** @returns {import("./types.js").RxState} */
 const freshRx = () => ({ text: "", file: null, pending: null, warnings: [], busy: false, err: "", aiBusy: false });
 
 /** @type {import("./types.js").AppState} */
@@ -28,6 +28,7 @@ let view = "today";
 let rx = freshRx();
 const family = { summary: "", summaryBusy: false, doctorText: "" };
 let focusHeading = false;
+let animateNext = true;
 
 /* ---------- derived values ---------- */
 
@@ -49,7 +50,7 @@ const context = () => ({
   canSpeak: canSpeak(),
 });
 
-const notify = (message) => toast(message, esc);
+const notify = toast;
 
 /* ---------- rendering ---------- */
 
@@ -70,6 +71,11 @@ function render() {
     CLOCKS.map((c) => `<button class="chip${state.demo === c.value ? " on" : ""}" data-a="clock" data-v="${c.value == null ? "" : c.value}" aria-pressed="${state.demo === c.value}">${c.label}</button>`).join("") +
     '<button class="chip" data-a="reset">Reset</button>';
   applySizes();
+  if (animateNext) {
+    animateNext = false;
+    const current = $("#app .view");
+    if (current) current.classList.add("enter");
+  }
 
   const textarea = $("#rxtext");
   if (textarea) textarea.oninput = () => (rx.text = textarea.value);
@@ -89,8 +95,9 @@ function render() {
 /* ---------- prescription flow ---------- */
 
 async function readPrescription() {
-  if (!rx.text.trim() && !rx.file) {
-    rx.err = "Paste the prescription text or add a photo first.";
+  const problem = validateRxInput(rx.text, rx.file);
+  if (problem) {
+    rx.err = problem;
     return render();
   }
   Object.assign(rx, { busy: true, err: "", pending: null, warnings: [] });
@@ -144,6 +151,7 @@ function addToSchedule() {
   save(state);
   view = "today";
   focusHeading = true;
+  animateNext = true;
   render();
   notify(`${count} medicine${count > 1 ? "s" : ""} added to the schedule`);
 }
@@ -198,7 +206,7 @@ async function copyReport() {
 /* ---------- events ---------- */
 
 const ACTIONS = {
-  nav: ({ v }) => { view = v; focusHeading = true; render(); window.scrollTo({ top: 0, behavior: "smooth" }); },
+  nav: ({ v }) => { view = v; focusHeading = true; animateNext = true; render(); window.scrollTo({ top: 0, behavior: "smooth" }); },
   take: ({ id }) => { setTaken(id, true); render(); notify("Logged. Your family can see it."); },
   untake: ({ id }) => { setTaken(id, false); render(); },
   speak: ({ id }) => readAloud(id),
@@ -215,7 +223,7 @@ const ACTIONS = {
 };
 
 document.addEventListener("click", (event) => {
-  const el = event.target.closest("[data-a]");
+  const el = /** @type {HTMLElement|null} */ (/** @type {Element} */ (event.target).closest("[data-a]"));
   if (!el) return;
   const handler = ACTIONS[el.dataset.a];
   if (handler) handler(el.dataset);
@@ -223,7 +231,7 @@ document.addEventListener("click", (event) => {
 
 document.querySelector("[data-a='xl']").addEventListener("click", (event) => {
   const on = document.documentElement.classList.toggle("xl");
-  event.currentTarget.setAttribute("aria-pressed", String(on));
+  /** @type {HTMLElement} */ (event.currentTarget).setAttribute("aria-pressed", String(on));
 });
 
 render();

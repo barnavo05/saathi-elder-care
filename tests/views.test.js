@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { viewToday } from "../src/views/today.js";
 import { viewFamily } from "../src/views/family.js";
 import { viewPrescription } from "../src/views/prescription.js";
-import { esc } from "../src/escape.js";
+import { esc } from "../src/text.js";
 
 const today = "2026-11-15";
 const meds = [

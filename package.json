@@ -9,7 +9,9 @@
     "start": "python3 -m http.server 8080",
     "test": "node --test",
     "lint": "eslint .",
-    "check": "npm run lint && npm test"
+    "check": "npm run lint && npm run typecheck && npm test",
+    "coverage": "node --test --experimental-test-coverage",
+    "typecheck": "tsc -p tsconfig.json"
   },
   "engines": {
     "node": ">=18"
@@ -17,6 +19,17 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.15.0",
-    "globals": "^17.14.0"
-  }
+    "globals": "^17.14.0",
+    "typescript": "^7.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/barnavo05/saathi-elder-care.git"
+  },
+  "keywords": [
+    "elder-care",
+    "medication",
+    "accessibility",
+    "hackathon"
+  ]
 }

@@ -1,3 +1,5 @@
+import { capitalise } from "./text.js";
+
 /**
  * Offline drug interaction rules. These always run, even when AI is unavailable.
  * This is a small illustrative list, not a clinical database.
@@ -55,7 +57,6 @@ export const RULES = [
 ];
 
 const matches = (name, terms) => terms.some((t) => name.includes(t));
-const capitalise = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
 /**
  * Check new prescription items against the current medicines and each other.

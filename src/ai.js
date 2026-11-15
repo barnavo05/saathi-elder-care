@@ -13,8 +13,9 @@ let supportsImages = false;
 /** Resolve the AI capability once at start up. Never throws. */
 export async function initAI() {
   try {
-    if (window.claude && window.claude.use) {
-      const s = await window.claude.use("sample");
+    const host = /** @type {any} */ (window).claude;
+    if (host && host.use) {
+      const s = await host.use("sample");
       if (s) {
         sample = s;
         try {
@@ -69,8 +70,8 @@ export async function aiReview(existingMeds, newItems) {
   try {
     const reply = await sample(prompt, { cache: false });
     return extractJSON(reply.text)
-      .slice(0, 3)
       .filter((a) => a && a.title && a.plain)
+      .slice(0, 3)
       .map((a) => ({
         severity: ["high", "medium", "low"].includes(a.severity) ? a.severity : "medium",
         title: String(a.title),

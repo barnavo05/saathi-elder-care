@@ -3,7 +3,7 @@
 import { fmt, dosesFor, weekSummary } from "../schedule.js";
 import { lowSupply, describeSupply } from "../refill.js";
 import { buildDoctorSummary } from "../report.js";
-import { esc } from "../escape.js";
+import { esc } from "../text.js";
 import { statusOf, statusLabel } from "./shared.js";
 
 function alertBlock(ctx, missed) {
@@ -58,7 +58,7 @@ export function viewFamily(ctx, view) {
   html += alertBlock(ctx, missed);
   html += `<div class="stats"><div class="stat"><b>${week.avg}%</b><span>taken, last 7 days</span></div><div class="stat"><b>${week.taken}/${week.total}</b><span>doses logged</span></div><div class="stat"><b>${missed.length}</b><span>missed today</span></div></div>`;
   html += chart(week) + refillBlock(low) + weeklyNote(view) + doctorBlock(view);
-  html += `<section class="grp" aria-label="Today dose by dose"><h3>Today, dose by dose</h3>${doses.map((d) => `<div class="row"><div class="t">${fmt(d.min)}</div><div><div class="n">${esc(d.med.name)} ${esc(d.med.dose)}</div></div><div class="act">${statusLabel(ctx, d)}</div></div>`).join("")}</section>`;
+  html += `<section class="grp" aria-label="Today dose by dose"><h2>Today, dose by dose</h2>${doses.map((d) => `<div class="row"><div class="t">${fmt(d.min)}</div><div><div class="n">${esc(d.med.name)} ${esc(d.med.dose)}</div></div><div class="act">${statusLabel(ctx, d)}</div></div>`).join("")}</section>`;
   return `${html}</div>`;
 }
 

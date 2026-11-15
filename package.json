@@ -1,0 +1,15 @@
+{
+  "name": "saathi",
+  "version": "1.0.0",
+  "description": "A medication companion for elders and their families. Reads prescriptions, checks interactions, alerts family on missed doses.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

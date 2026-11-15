@@ -82,3 +82,18 @@ export function lastDays(n, now = new Date()) {
   }
   return out;
 }
+
+/**
+ * Adherence for the last n days (settled doses only).
+ * @returns {{days: Array<{key:string,label:string,stats:ReturnType<typeof dayStats>}>, total:number, taken:number, avg:number}}
+ */
+export function weekSummary(meds, taken, today, nowMinutes, n = 7, now = new Date()) {
+  const days = lastDays(n, now).map((d) => ({
+    ...d,
+    stats: dayStats(meds, taken, d.key, today, nowMinutes),
+  }));
+  const counted = days.filter((d) => d.stats.pct !== null);
+  const total = counted.reduce((sum, d) => sum + d.stats.total, 0);
+  const done = counted.reduce((sum, d) => sum + d.stats.taken, 0);
+  return { days, total, taken: done, avg: total ? Math.round((done / total) * 100) : 0 };
+}

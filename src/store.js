@@ -8,11 +8,12 @@ import { dkey, dosesFor } from "./schedule.js";
 
 const KEY = "saathi-v1";
 
+/** @type {import("./types.js").Medicine[]} */
 export const seedMeds = [
-  { id: "m1", name: "Metformin", dose: "500 mg", times: ["08:00", "20:00"], note: "With food", from: "2000-01-01" },
-  { id: "m2", name: "Amlodipine", dose: "5 mg", times: ["08:00"], note: "For blood pressure", from: "2000-01-01" },
-  { id: "m3", name: "Aspirin", dose: "75 mg", times: ["14:00"], note: "After lunch", from: "2000-01-01" },
-  { id: "m4", name: "Atorvastatin", dose: "10 mg", times: ["21:00"], note: "At bedtime", from: "2000-01-01" },
+  { id: "m1", name: "Metformin", dose: "500 mg", times: ["08:00", "20:00"], note: "With food", from: "2000-01-01", pillsLeft: 9 },
+  { id: "m2", name: "Amlodipine", dose: "5 mg", times: ["08:00"], note: "For blood pressure", from: "2000-01-01", pillsLeft: 24 },
+  { id: "m3", name: "Aspirin", dose: "75 mg", times: ["14:00"], note: "After lunch", from: "2000-01-01", pillsLeft: 4 },
+  { id: "m4", name: "Atorvastatin", dose: "10 mg", times: ["21:00"], note: "At bedtime", from: "2000-01-01", pillsLeft: 40 },
 ];
 
 /** Deterministic pseudo random numbers so the demo history is stable. */

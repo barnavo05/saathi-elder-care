@@ -72,3 +72,17 @@ test("lastDays returns n days ending today, oldest first", () => {
   assert.equal(days[6].key, "2026-11-15");
   assert.equal(days[0].key, "2026-11-09");
 });
+
+import { weekSummary } from "../src/schedule.js";
+
+test("weekSummary totals settled doses across the week", () => {
+  const today = "2026-11-15";
+  const taken = { "2026-11-14": { "a@08:00": 490, "a@20:00": 1210 }, [today]: { "a@08:00": 485 } };
+  const week = weekSummary(meds.slice(0, 1), taken, today, 22 * 60, 7, new Date(2026, 10, 15));
+  assert.equal(week.days.length, 7);
+  // 14 Nov: 2 of 2 taken. Today at 10 PM: 08:00 taken, 20:00 missed. Earlier days: all missed.
+  assert.equal(week.days[5].stats.pct, 100);
+  assert.equal(week.days[6].stats.pct, 50);
+  assert.equal(week.taken, 3);
+  assert.equal(week.avg, Math.round((3 / week.total) * 100));
+});

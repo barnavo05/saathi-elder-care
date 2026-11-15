@@ -8,15 +8,17 @@ A medication companion for elders and their families. Built solo for the CATALYS
 
 Missing one dose is easy. Noticing it from another city is hard. Saathi gives the elder one big screen and one tap, and gives the family a quiet dashboard that gets loud only when a dose is missed.
 
-## Features
+## How it answers the challenge
 
-| Area | What it does |
+| Need in elder care and medication management | What Saathi does |
 | --- | --- |
-| Today | Large text, a "next dose" card, one tap to mark a dose taken, undo, and late logging. |
-| Prescription | Paste a prescription and it becomes a schedule. AI reads it when available, with a built in reader as fallback. |
-| Safety check | Flags risky combinations (for example warfarin with aspirin) and duplicates in plain language. It never changes a dose. |
-| Family | Missed dose alert, simulated nudge, 7 day adherence chart, and an AI written weekly note. |
-| Demo clock | Jump between morning, afternoon and night to see missed dose alerts without waiting. |
+| Take the right medicine at the right time | Today view with a next dose card, due and overdue states, one tap logging, undo and late logging |
+| Understand new prescriptions | Paste a prescription (or add a photo with AI) and it becomes a daily schedule |
+| Avoid dangerous combinations | Safety check flags interactions and duplicates in plain language. It never changes a dose |
+| Never run out | Refill tracker counts pills used and warns when about 5 days of supply remain |
+| Elders with poor eyesight or low literacy | Large text toggle, one primary action per screen, and a Read aloud button for the next dose |
+| Keep family informed | Missed dose alert, simulated nudge, 7 day adherence chart, AI written weekly note |
+| Work with doctors | One click Doctor summary: medicines, adherence, missed doses and refills as plain text |
 
 ## Run it
 
@@ -24,40 +26,62 @@ The app uses ES modules, so serve it over http instead of opening the file direc
 
 ```bash
 npm start        # serves on http://localhost:8080
-npm test         # runs the unit tests (Node 18 or newer, no dependencies)
+npm run check    # lint plus all tests (Node 18 or newer)
 ```
 
-Then open the Prescription tab, click "Use a sample", then "Read prescription".
+Then open the Prescription tab, click "Use a sample", then "Read prescription". Use the Demo clock bar at the bottom to jump to 2:30 PM and see missed dose alerts.
 
 ## Project structure
 
 ```
-index.html          Page shell, skip link, landmarks, Content Security Policy
-styles.css          Design tokens, layout, focus styles, reduced motion
+index.html            Page shell, skip link, landmarks, Content Security Policy
+styles.css            Design tokens, layout, focus styles, reduced motion
 src/
-  schedule.js       Pure time and dose status logic (no DOM)
-  rules.js          Offline drug interaction rules and duplicate check (no DOM)
-  parser.js         Prescription parsing and AI output cleanup (no DOM)
-  store.js          localStorage persistence and demo data
-  ai.js             Optional AI layer, returns null when unavailable
-  app.js            Views, events and rendering
-tests/              Unit tests using the built in node:test runner
-.github/workflows/  CI that runs the tests on every push
+  config.js           Constants (periods, clock presets, refill threshold)
+  types.js            JSDoc type definitions (Medicine, Dose, ViewContext, ...)
+  schedule.js         Time, dose status and adherence logic (pure)
+  rules.js            Offline drug interaction rules and duplicate check (pure)
+  parser.js           Prescription parsing and AI output cleanup (pure)
+  refill.js           Supply tracking and low stock detection (pure)
+  report.js           Doctor summary text (pure)
+  escape.js           HTML escaping (pure)
+  store.js            localStorage persistence and demo data
+  ai.js               Optional AI layer, returns null when unavailable
+  speech.js           Read aloud through the browser speech API
+  dom.js              Small DOM helpers (toast, focus, sizes)
+  views/              Pure view functions: data in, HTML string out
+    today.js  prescription.js  family.js  shared.js
+  app.js              App shell: state, event table, rendering
+tests/                49 unit tests using the built in node:test runner
+.github/workflows/    CI runs lint and tests on every push
 ```
 
-The logic that matters (scheduling, interaction rules, parsing) lives in pure modules with no DOM access, which is why it can be tested directly.
+Design rule: everything that makes a decision (scheduling, interactions, parsing, refills, report text) and every view is a pure function with no DOM access. The only files that touch the DOM are `app.js` and `dom.js`.
 
 ## Testing
 
-27 unit tests cover dose status transitions, time formatting, adherence maths, interaction rules (including case insensitivity, duplicates and false positives), and the prescription parser (abbreviations such as BD and TDS, explicit AM and PM times, malformed input, and AI replies wrapped in code fences). They run with `npm test` and in GitHub Actions on every push.
+49 unit tests cover:
+- dose status transitions, time formatting and adherence maths
+- interaction rules, including case insensitivity, duplicates and false positives
+- the prescription parser (abbreviations such as BD and TDS, explicit AM and PM times, malformed input, AI replies wrapped in code fences)
+- refill maths (never below zero, untracked medicines ignored)
+- doctor summary text
+- the rendered views, including that malicious medicine names are escaped and that alerts, progress bars and chart text alternatives are present
+
+```bash
+npm test
+```
+
+ESLint runs with `npm run lint`. CI runs both on every push.
 
 ## Security and privacy
 
 - Strict Content Security Policy: scripts only from this site, no inline scripts, no inline styles, no network connections from the page.
-- All dynamic text is HTML escaped before rendering.
+- All dynamic text is HTML escaped before rendering, and tests check this.
 - No API keys exist anywhere in the code base.
 - Medication data stays in the browser (localStorage). Nothing is sent to a server by the app itself.
-- Storage and AI calls are wrapped so a failure never breaks the app.
+- Read aloud uses the browser's own speech engine, so text does not leave the device.
+- Storage, speech and AI calls are wrapped so a failure never breaks the app.
 
 ## Accessibility
 
@@ -66,7 +90,7 @@ The logic that matters (scheduling, interaction rules, parsing) lives in pure mo
 - Focus moves to the page heading when the view changes, and returns to the same control after actions.
 - Live regions announce toasts, safety results and the weekly note. The progress bar uses `role="progressbar"`. The chart has a text alternative.
 - Touch targets are at least 44 pixels. Text contrast meets WCAG AA. Status is shown in words, not only colour.
-- Larger text toggle for elders, and `prefers-reduced-motion` is respected.
+- Larger text toggle, Read aloud for the next dose, and `prefers-reduced-motion` is respected.
 
 ## AI
 
@@ -77,6 +101,7 @@ When the page is opened inside Claude, the AI layer reads prescriptions (text an
 - The interaction list is small and illustrative. It is not a clinical database.
 - The nudge to the elder is simulated. A production version would send SMS or WhatsApp messages from a backend.
 - Data is per browser. Syncing between the elder's phone and the family's phone would need a backend.
+- Pill counts assume one pill per dose.
 
 Not a medical device and not medical advice. Always confirm with a doctor or pharmacist.
 

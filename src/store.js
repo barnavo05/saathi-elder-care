@@ -66,7 +66,8 @@ export function initState(today) {
   let state = read();
   if (!state || !Array.isArray(state.meds)) {
     state = { meds: structuredClone(seedMeds), taken: {}, demo: 8 * 60 + 20 };
-    seedHistory(state.meds, state.taken);
+    const [y, m, d] = today.split("-").map(Number);
+    seedHistory(state.meds, state.taken, new Date(y, m - 1, d));
     save(state);
   }
   if (!state.taken[today]) state.taken[today] = {};
